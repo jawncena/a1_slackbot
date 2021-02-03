@@ -2,30 +2,25 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const {WebClient} = require ('@slack/web-api')
 const {createEventAdapter} = require ('@slack/events-api')
-
-const app = express().use(
-  bodyParser.urlencoded({
-    extended: true,
-  }),
-);
-
 // Grab ENV Variables
 require('dotenv').config()
-
-
-
 //Grab Tokens from ENV
 const slackEvents = createEventAdapter(process.env.SIGNING_SECRET)
 const SlackClient = new WebClient(process.env.SLACK_TOKEN)
 const Port = process.env.PORT || 5000;
 
+const app = express()
+app.use('/slack/events', slackEvents.expressMiddleware())
+app.use(bodyParser.urlencoded({extended: true}))
+app.use(bodyParser.json())
+
 app.listen(Port, function(){
   console.log("App listening");
 });
 app.get('/', function(req, res) {
-  res.send('Server is working! Path Hit: ' + req.url);
+  res.send('Server is working!);
 });
-app.use('/slack/events', slackEvents.expressMiddleware())
+
 
 app.get('/oauth', function(req, res) {
   // When authorizing app, a code query param is passed on the oAuth endpoint.
