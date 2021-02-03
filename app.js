@@ -15,7 +15,7 @@ require('dotenv').config()
 
 
 //Grab Tokens from ENV
-const SlackEvents = createEventAdapter(process.env.SIGNING_SECRET)
+const slackEvents = createEventAdapter(process.env.SIGNING_SECRET)
 const SlackClient = new WebClient(process.env.SLACK_TOKEN)
 const Port = process.env.PORT || 5000;
 
@@ -58,7 +58,7 @@ app.get('/oauth', function(req, res) {
 });
 
 //When bot is mentioned
-SlackEvents.on('app_mention', (event)=>{
+slackEvents.on('app_mention', (event)=>{
     // Server status
     console.log(`Got message from user ${event.user}: ${event.text}`);
   (async () => {
@@ -70,9 +70,9 @@ SlackEvents.on('app_mention', (event)=>{
     }
   })()
 })
-SlackEvents.on('error', console.error)
+slackEvents.on('error', console.error)
 
 // // Start Server on port
-SlackEvents.start(8080).then(()=>{
+slackEvents.start(8080).then(()=>{
     console.log(`Server started on port ${Port}`)
 })
