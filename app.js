@@ -1,6 +1,5 @@
 const {WebClient} = require ('@slack/web-api')
 const {createEventAdapter} = require ('@slack/events-api')
-const { SecretManagerServiceClient } = require('@google-cloud/secret-manager')
 
 // Grab ENV Variables
 require('dotenv').config()
