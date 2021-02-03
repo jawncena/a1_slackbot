@@ -25,6 +25,7 @@ app.listen(Port, function(){
 app.get('/', function(req, res) {
   res.send('Server is working! Path Hit: ' + req.url);
 });
+app.use('/slack/events', slackEvents.expressMiddleware())
 
 app.get('/oauth', function(req, res) {
   // When authorizing app, a code query param is passed on the oAuth endpoint.
