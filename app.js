@@ -7,7 +7,7 @@ require('dotenv').config()
 //Grab Tokens from ENV
 const SlackEvents = createEventAdapter(process.env.SIGNING_SECRET)
 const SlackClient = new WebClient(process.env.SLACK_TOKEN)
-const Port = process.env.SLACKPORT || 3000;
+const Port = process.env.PORT || 3000;
 
 //When bot is mentioned
 SlackEvents.on('app_mention', (event)=>{
