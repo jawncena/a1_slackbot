@@ -3,13 +3,16 @@ const axios = require('axios');
 const bodyParser = require('body-parser');
 const {WebClient} = require ('@slack/web-api')
 const {createEventAdapter} = require ('@slack/events-api')
-const {styleJoke} = require('./responseStyles');
+const {styleJoke, styleLookup} = require('./responseStyles');
 // Grab ENV Variables
 require('dotenv').config()
 //Grab Tokens from ENV
 const slackEvents = createEventAdapter(process.env.SIGNING_SECRET)
 const SlackClient = new WebClient(process.env.SLACK_TOKEN)
 const Port = process.env.PORT || 5000;
+const UTELLY_API_KEY = process.env.UTELLY_API_KEY;
+const UTELLY_HOST = process.env.UTELLY_HOST;
+
 
 const app = express()
 app.use('/slack/events', slackEvents.expressMiddleware())
@@ -31,6 +34,35 @@ app.post('/joke', async function(req, res) {
       res.json(styleJoke(joke.data));
     })
 });
+
+// Listener for 'lookup' slash command that uses the UTelly API
+app.post('/lookup', async function(req, res) {
+  // Saves the user input to a variable
+  let query = (req.body.text);
+  // Format's the API request as expected. The UTelly API needs specific headers.
+  // Check with your API documentation for specifics. If none, follow joke API example.
+  let options = {
+    method: 'GET',
+    url: 'https://utelly-tv-shows-and-movies-availability-v1.p.rapidapi.com/lookup',
+    params: {term: `${req.body.text}`, country: 'ca'},
+    headers: {
+      'x-rapidapi-key': UTELLY_API_KEY,
+      'x-rapidapi-host': UTELLY_HOST
+    }
+  };
+  // Make API call, store response in a variable called results.
+  axios.request(options).then((results) =>{
+    // Return the data to user
+    res.json(
+      // Style the data so it looks nice. 
+      styleLookup(query, results.data)
+      );
+      //If there are any errors
+  }).catch(function (error) {
+    console.error(error);
+  });
+});
+
 
 //When bot is mentioned
 slackEvents.on('app_mention', (event)=>{
