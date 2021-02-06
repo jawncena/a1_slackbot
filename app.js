@@ -1,7 +1,9 @@
 const express = require('express');
+const axios = require('axios');
 const bodyParser = require('body-parser');
 const {WebClient} = require ('@slack/web-api')
 const {createEventAdapter} = require ('@slack/events-api')
+const {styleJoke} = require('./responseStyles');
 // Grab ENV Variables
 require('dotenv').config()
 //Grab Tokens from ENV
@@ -21,35 +23,13 @@ app.get('/', function(req, res) {
   res.send('Server is working!');
 });
 
-
-app.get('/oauth', function(req, res) {
-  // When authorizing app, a code query param is passed on the oAuth endpoint.
-  // If that code is not there, we respond with an error message
-  if (!req.query.code) {
-    res.status(500);
-    res.send({'Error': 'Looks like we\'re not getting code.'});
-    console.log('Looks like we\'re not getting code.');
-  } else {
-    // If it's there...
-
-    // We'll do a GET call to Slack's `oauth.access` endpoint,
-    // passing app's client ID secret, & the code we just got as query params.
-    request({
-      url: 'https://slack.com/api/oauth.access', // URL to hit
-      qs: {
-        code: req.query.code,
-        client_id: clientId,
-        client_secret: clientSecret},
-      method: 'GET', // Specify the method
-
-    }, function(error, response, body) {
-      if (error) {
-        console.log(error);
-      } else {
-        res.json(body);
-      }
-    });
-  }
+// Creates response, whenever Slack sends a request to the /joke request url
+app.post('/joke', async function(req, res) {
+  await axios.get('https://official-joke-api.appspot.com/random_joke')
+    .then((joke)=>{
+      console.log(joke.data);
+      res.json(styleJoke(joke.data));
+    })
 });
 
 //When bot is mentioned
@@ -59,7 +39,7 @@ slackEvents.on('app_mention', (event)=>{
   (async () => {
     try {
         //Post Message
-      await SlackClient.chat.postMessage({ channel: event.channel, text: `${event.text}` })
+      await SlackClient.chat.postMessage({ channel: event.channel, text: `Hello, this is wayne` })
     } catch (error) {
       console.log(error.data)
     }
