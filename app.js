@@ -59,7 +59,7 @@ slackEvents.on('app_mention', (event)=>{
   (async () => {
     try {
         //Post Message
-      await SlackClient.chat.postMessage({ channel: event.channel, text: `Hello it is me` })
+      await SlackClient.chat.postMessage({ channel: event.channel, text: `${event.text}` })
     } catch (error) {
       console.log(error.data)
     }
