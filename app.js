@@ -1,9 +1,11 @@
 const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
+
 const {WebClient} = require ('@slack/web-api')
 const {createEventAdapter} = require ('@slack/events-api')
 const {styleJoke, styleLookup} = require('./responseStyles');
+
 // Grab ENV Variables
 require('dotenv').config()
 //Grab Tokens from ENV
