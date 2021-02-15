@@ -28,6 +28,7 @@ exports.styleJoke = (joke) => {
 
 
 
+
 /* Styling for 'lookup' response
 param(query) : what the user inputted, ex: /lookup Avengers -> the query is Avengers
 param(data):  the results from the UTelly API
@@ -84,6 +85,59 @@ exports.styleLookup = (query, data) =>{
     });
       
   // Return the array of messages to the channeel.
+  return { 
+    response_type: 'in_channel',
+      blocks: results
+    };
+}
+
+
+exports.styleNews = (query, data)=>{
+  if(data.totalResults == 0){
+    return noResults={
+      response_type: 'in_channel',
+      blocks: [
+        {
+          'type': 'section',
+          'text': {
+            'type': 'mrkdwn',
+            'text': `There are no news articles for the keyword: "${query}"`,
+          },
+        }
+      ]
+    }
+  }
+
+  let results= []
+  results.push({
+    'type': 'section',
+    'text': {
+      'type': 'mrkdwn',
+      'text': `Here are the News Articles for: "${query}"`,
+    }
+  });
+
+  data.articles.map(result =>{
+    var date = new Date(result.publishedAt);
+    results.push(
+      {
+        'type': 'section',
+        'text': {
+          'type': 'mrkdwn',
+          'text': `*Title:* ${result.title} \n*Date:* ${date} \n *Publisher:* ${result.source.name} \n*Description:* ${result.description}  \n *Read More At:* ${result.url}`,
+        },
+        "accessory": {
+          "type": "image",
+          "image_url": `${result.urlToImage}`,
+          "alt_text": "alt text for image"
+        },
+
+      })
+    results.push( {
+        "type": "divider"
+      });
+    });
+      
   return { 
     response_type: 'in_channel',
       blocks: results

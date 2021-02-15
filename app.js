@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 
 const {WebClient} = require ('@slack/web-api')
 const {createEventAdapter} = require ('@slack/events-api')
-const {styleJoke, styleLookup} = require('./responseStyles');
+const {styleJoke, styleLookup, styleNews} = require('./responseStyles');
 
 // Grab ENV Variables
 require('dotenv').config()
@@ -14,7 +14,7 @@ const SlackClient = new WebClient(process.env.SLACK_TOKEN)
 const Port = process.env.PORT || 5000;
 const UTELLY_API_KEY = process.env.UTELLY_API_KEY;
 const UTELLY_HOST = process.env.UTELLY_HOST;
-
+const NEWS_API_KEY = process.env.NEWS_API_KEY;
 
 const app = express()
 app.use('/slack/events', slackEvents.expressMiddleware())
@@ -65,6 +65,25 @@ app.post('/lookup', async function(req, res) {
   });
 });
 
+app.post('/news', async function(req,res){
+let query = (req.body.text)
+
+let options ={
+  method: 'GET',
+  url:'https://newsapi.org/v2/everything',
+  params:{q: `${req.body.text}`, pageSize:'5'},
+  headers:{
+    'X-Api-Key':NEWS_API_KEY ,
+  }
+};
+axios.request(options).then((results)=>{
+  res.json(
+    styleNews(query,results.data)
+  );
+}).catch(function(error){
+  console.error(error);
+})
+});
 
 //When bot is mentioned
 slackEvents.on('app_mention', (event)=>{
