@@ -65,6 +65,24 @@ app.post('/lookup', async function(req, res) {
   });
 });
 
+app.post('/news', async function(req,res){
+let query = (req.body.text)
+let options ={
+  method: 'GET',
+  url:'https://newsapi.org/v2/everything',
+  params:{q: `${req.body.text}`, pageSize:'5'},
+  headers:{
+    'X-Api-Key':NEWS_API_KEY ,
+  }
+};
+await axios.request(options).then((results)=>{
+  res.json(
+    styleNews(query,results.data)
+  );
+}).catch(function(error){
+  console.error(error);
+})
+});
 
 //When bot is mentioned
 slackEvents.on('app_mention', (event)=>{
