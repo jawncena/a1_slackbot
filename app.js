@@ -53,7 +53,7 @@ app.post('/lookup', async function(req, res) {
     }
   };
   // Make API call, store response in a variable called results.
-  axios.request(options).then((results) =>{
+  await axios.request(options).then((results) =>{
     // Return the data to user
     res.json(
       // Style the data so it looks nice. 
