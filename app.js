@@ -4,7 +4,8 @@ const bodyParser = require('body-parser');
 
 const {WebClient} = require ('@slack/web-api')
 const {createEventAdapter} = require ('@slack/events-api')
-const {styleJoke, styleLookup, styleNews} = require('./responseStyles');
+
+const {styleJoke, styleLookup, styleNews, styleInspire} = require('./responseStyles');
 
 // Grab ENV Variables
 require('dotenv').config()
@@ -84,6 +85,14 @@ await axios.request(options).then((results)=>{
 })
 });
 
+app.post('/inspire', async function(req, res) {
+  await axios.get('https://raw.githubusercontent.com/BolajiAyodeji/inspireNuggets/master/src/quotes.json')
+      .then((inspire) => {
+        res.json(styleInspire(inspire.data));
+      })
+  }
+);
+
 //When bot is mentioned
 slackEvents.on('app_mention', (event)=>{
     // Server status
@@ -91,7 +100,7 @@ slackEvents.on('app_mention', (event)=>{
   (async () => {
     try {
         //Post Message
-      await SlackClient.chat.postMessage({ channel: event.channel, text: `Hello, this is wayne` })
+      await SlackClient.chat.postMessage({ channel: event.channel, text: `This is the bot testing branch changes` })
     } catch (error) {
       console.log(error.data)
     }

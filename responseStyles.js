@@ -143,3 +143,29 @@ exports.styleNews = (query, data)=>{
       blocks: results
     };
 }
+
+exports.styleInspire = (quotes) => {
+    const random = Math.floor(Math.random() * quotes.length);
+    const quote = quotes[random].quote
+    const author = quotes[random].author
+
+    return {
+        response_type: 'in_channel',
+        blocks: [
+            {
+                'type': 'section',
+                'text': {
+                    'type': 'mrkdwn',
+                    'text': `${quote}`,
+                },
+            },
+            {
+                'type': 'section',
+                'text': {
+                    'type': 'mrkdwn',
+                    'text': `*${author}*`
+                },
+            }
+        ]
+    };
+};
