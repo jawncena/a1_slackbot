@@ -50,6 +50,7 @@ app.post('/doge', async function(req, res) {
   }).catch(function (error) {
     console.error(error);
   });
+});
   
 // Creates response, whenever Slack sends a request to the /joke request url
 app.post('/joke', async function(req, res) {
@@ -117,20 +118,20 @@ app.post('/inspire', async function(req, res) {
 
 //When bot is mentioned
 slackEvents.on('app_mention', (event)=>{
-    // Server status
-    console.log(`Got message from user ${event.user}: ${event.text}`);
-  (async () => {
-    try {
-        //Post Message
-      await SlackClient.chat.postMessage({ channel: event.channel, text: `This is the bot testing branch changes` })
-    } catch (error) {
-      console.log(error.data)
-    }
-  })()
+  // Server status
+  console.log(`Got message from user ${event.user}: ${event.text}`);
+(async () => {
+  try {
+      //Post Message
+    await SlackClient.chat.postMessage({ channel: event.channel, text: `Hello, this is wayne` })
+    await SlackClient.chat.postMessage({ channel: event.channel, text: `This is the bot testing branch changes` })
+  } catch (error) {
+    console.log(error.data)
+  }
+})()
 })
 slackEvents.on('error', console.error)
-
 // // Start Server on port
 slackEvents.start(8080).then(()=>{
-    console.log(`Server started on port ${Port}`)
+  console.log(`Server started on port ${Port}`)
 })
