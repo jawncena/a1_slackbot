@@ -144,6 +144,41 @@ exports.styleNews = (query, data)=>{
     };
 }
 
+exports.styleDoge = (query, data) =>{
+  // If the user  query had no results, create an appropriate response
+  if(JSON.stringify(data.results)== '{}'){
+    return noResults = {
+      response_type: 'in_channel',
+      blocks: [
+        {
+          'type': 'section',
+          'text': {
+            'type': 'mrkdwn',
+            'text': `No Doge translation found for "${query}"`,
+          },
+        }
+      ]
+    }
+  }
+
+  // Create array of 'messages' that'll be sent back to Slack
+  let results = []
+  //If there were results returned by the API call, add starter message
+  results.push({
+    'type': 'section',
+    'text': {
+      'type': 'mrkdwn',
+      'text': `You've summon a Doge Translator for: "${query}"\nDoge says: "${data.contents.translated}" `,
+    }
+  });
+  
+  // Return the array of messages to the channel.
+  return { 
+    response_type: 'in_channel',
+      blocks: results
+    };
+}
+
 exports.styleInspire = (quotes) => {
     const random = Math.floor(Math.random() * quotes.length);
     const quote = quotes[random].quote

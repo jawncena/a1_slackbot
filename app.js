@@ -4,8 +4,7 @@ const bodyParser = require('body-parser');
 
 const {WebClient} = require ('@slack/web-api')
 const {createEventAdapter} = require ('@slack/events-api')
-
-const {styleJoke, styleLookup, styleNews, styleInspire} = require('./responseStyles');
+const {styleJoke, styleLookup, styleNews, styleInspire, styleDoge} = require('./responseStyles');
 
 // Grab ENV Variables
 require('dotenv').config()
@@ -29,6 +28,30 @@ app.get('/', function(req, res) {
   res.send('Server is working!');
 });
 
+// Listener for 'doge' slash command that uses the Doge Translator API
+app.post('/doge', async function(req, res) {
+  // Saves the user input to a variable
+  let query = (req.body.text);
+  // Format's the API request as expected
+  let options = {
+    method: 'GET',
+    url: 'https://api.funtranslations.com/translate/doge.json',
+    params: {text: `${query}`},
+  
+  };
+  // Make API call, store response in a variable called results.
+  await axios.request(options).then((results) =>{
+    // Return the data to user
+    res.json(
+      // Style the data so it looks nice. 
+      styleDoge(query, results.data)
+      );
+      //If there are any errors
+  }).catch(function (error) {
+    console.error(error);
+  });
+});
+  
 // Creates response, whenever Slack sends a request to the /joke request url
 app.post('/joke', async function(req, res) {
   await axios.get('https://official-joke-api.appspot.com/random_joke')
@@ -95,20 +118,20 @@ app.post('/inspire', async function(req, res) {
 
 //When bot is mentioned
 slackEvents.on('app_mention', (event)=>{
-    // Server status
-    console.log(`Got message from user ${event.user}: ${event.text}`);
-  (async () => {
-    try {
-        //Post Message
-      await SlackClient.chat.postMessage({ channel: event.channel, text: `This is the bot testing branch changes` })
-    } catch (error) {
-      console.log(error.data)
-    }
-  })()
+  // Server status
+  console.log(`Got message from user ${event.user}: ${event.text}`);
+(async () => {
+  try {
+      //Post Message
+    await SlackClient.chat.postMessage({ channel: event.channel, text: `Hello, this is wayne` })
+    await SlackClient.chat.postMessage({ channel: event.channel, text: `This is the bot testing branch changes` })
+  } catch (error) {
+    console.log(error.data)
+  }
+})()
 })
 slackEvents.on('error', console.error)
-
 // // Start Server on port
 slackEvents.start(8080).then(()=>{
-    console.log(`Server started on port ${Port}`)
+  console.log(`Server started on port ${Port}`)
 })
