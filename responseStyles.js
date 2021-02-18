@@ -171,25 +171,36 @@ exports.styleDoge = (query, data) =>{
       'text': `You've summon a Doge Translator for: "${query}"\nDoge says: "${data.contents.translated}" `,
     }
   });
-    
-  // data.translation.map(result =>{
-  //   var date = new Date(result.publishedAt);
-  //   results.push(
-  //     {
-  //       'type': 'section',
-  //       'text': {
-  //         'type': 'mrkdwn',
-  //         'text': `*Doge says:* ${result.translated}`,
-  //       },
-  //     })
-  //   results.push( {
-  //       "type": "divider"
-  //     });
-  //   });
-      
+  
   // Return the array of messages to the channel.
   return { 
     response_type: 'in_channel',
       blocks: results
     };
 }
+
+exports.styleInspire = (quotes) => {
+    const random = Math.floor(Math.random() * quotes.length);
+    const quote = quotes[random].quote
+    const author = quotes[random].author
+
+    return {
+        response_type: 'in_channel',
+        blocks: [
+            {
+                'type': 'section',
+                'text': {
+                    'type': 'mrkdwn',
+                    'text': `${quote}`,
+                },
+            },
+            {
+                'type': 'section',
+                'text': {
+                    'type': 'mrkdwn',
+                    'text': `*${author}*`
+                },
+            }
+        ]
+    };
+};
