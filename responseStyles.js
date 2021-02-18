@@ -168,7 +168,7 @@ exports.styleDoge = (query, data) =>{
     'type': 'section',
     'text': {
       'type': 'mrkdwn',
-      'text': `You've summon a Doge Translator for: "${query}"\nDoge says: "${data.contents.translated}" `,
+      'text': `You've summoned a Doge Translator for: "${query}"\n\nDoge says: "${data.contents.translated}" `,
     }
   });
   
