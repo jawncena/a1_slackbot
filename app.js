@@ -1,7 +1,9 @@
 const express = require('express');
+const axios = require('axios');
 const bodyParser = require('body-parser');
 const {WebClient} = require ('@slack/web-api')
 const {createEventAdapter} = require ('@slack/events-api')
+const {styleJoke, styleLookup, styleNews, styleDoge} = require('./responseStyles');
 // Grab ENV Variables
 require('dotenv').config()
 //Grab Tokens from ENV
@@ -21,6 +23,29 @@ app.get('/', function(req, res) {
   res.send('Server is working!');
 });
 
+// Listener for 'doge' slash command that uses the Doge Translator API
+app.post('/doge', async function(req, res) {
+  // Saves the user input to a variable
+  let query = (req.body.text);
+  // Format's the API request as expected
+  let options = {
+    method: 'GET',
+    url: 'https://api.funtranslations.com/translate/doge.json',
+    params: {text: `${query}`},
+  
+  };
+  // Make API call, store response in a variable called results.
+  await axios.request(options).then((results) =>{
+    // Return the data to user
+    res.json(
+      // Style the data so it looks nice. 
+      styleDoge(query, results.data)
+      );
+      //If there are any errors
+  }).catch(function (error) {
+    console.error(error);
+  });
+});
 
 app.get('/oauth', function(req, res) {
   // When authorizing app, a code query param is passed on the oAuth endpoint.
@@ -58,7 +83,7 @@ slackEvents.on('app_mention', (event)=>{
     console.log(`Got message from user ${event.user}: ${event.text}`);
   (async () => {
     try {
-        //Post Message
+      //   //Post Message
       await SlackClient.chat.postMessage({ channel: event.channel, text: `${event.text}` })
     } catch (error) {
       console.log(error.data)
