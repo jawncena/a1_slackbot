@@ -1,7 +1,6 @@
 const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
-//const spell = require('spell-checker-js');
 var SpellChecker = require('simple-spellchecker');
 
 const {WebClient} = require ('@slack/web-api');
@@ -9,7 +8,6 @@ const {createEventAdapter} = require ('@slack/events-api');
 const {styleJoke, styleLookup, styleNews, styleInspire, styleDoge} = require('./responseStyles');
 
 //nlp dictionary
-//spell.load('en');
 var dictionary = SpellChecker.getDictionarySync("en-US");    
 // Grab ENV Variables
 require('dotenv').config();
@@ -95,7 +93,25 @@ app.post('/lookup', async function(req, res) {
 });
 
 app.post('/news', async function(req,res){
-let query = (req.body.text)
+let query = req.body.text
+//NLP STUFF
+//Get your query into an array of words
+let wordArray=query.trim().split(" ");
+//2 Arrays, one for the wrong spelling and one for suggestions
+let typos = []
+let spellcheck =[]
+//Map and add to arrays
+wordArray.forEach(element => {
+  if(!dictionary.spellCheck(element)){
+    spellcheck.push(element);
+    var wordSuggest = dictionary.getSuggestions(element,2,10);
+    wordSuggest.forEach(sug=>{
+      typos.push(sug);
+    })
+   
+  }
+});
+// End of NLP Stuff
 let options ={
   method: 'GET',
   url:'https://newsapi.org/v2/everything',
@@ -104,12 +120,16 @@ let options ={
     'X-Api-Key':NEWS_API_KEY ,
   }
 };
+
 await axios.request(options).then((results)=>{
   res.json(
-    styleNews(query,results.data)
+    styleNews(spellcheck,typos,query,results.data)
   );
 }).catch(function(error){
-  console.error(error);
+  res.json(
+    styleNews(spellcheck,typos,query,"")
+  );
+  //console.error(error);
 })
 });
 
