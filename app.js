@@ -92,6 +92,7 @@ app.post('/lookup', async function(req, res) {
   });
 });
 
+// Listener for 'news' slash command that uses the News API
 app.post('/news', async function(req,res){
 let query = req.body.text
 //NLP STUFF
