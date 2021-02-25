@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 
 const {WebClient} = require ('@slack/web-api')
 const {createEventAdapter} = require ('@slack/events-api')
-const {styleJoke, styleLookup, styleNews, styleInspire, styleDoge} = require('./responseStyles');
+const {styleJoke, styleLookup, styleNews, styleInspire, styleDoge, styleFood} = require('./responseStyles');
 
 // Grab ENV Variables
 require('dotenv').config()
@@ -14,6 +14,10 @@ const SlackClient = new WebClient(process.env.SLACK_TOKEN)
 const Port = process.env.PORT || 5000;
 const UTELLY_API_KEY = process.env.UTELLY_API_KEY;
 const UTELLY_HOST = process.env.UTELLY_HOST;
+
+const FOOD_API_KEY = process.env.FOOD_KEY;
+const FOOD_HOST = process.env.FOOD_HOST;
+
 const NEWS_API_KEY = process.env.NEWS_API_KEY;
 
 const app = express()
@@ -24,8 +28,34 @@ app.use(bodyParser.json())
 app.listen(Port, function(){
   console.log("App listening");
 });
+
 app.get('/', function(req, res) {
   res.send('Server is working!');
+});
+
+app.post('/food', async function(req, res) {
+  // Saves the user input to a variable
+  let query = (req.body.text);
+  // Format's the API request as expected. The UTelly API needs specific headers.
+  // Check with your API documentation for specifics. If none, follow joke API example.
+  let options = {
+    method: 'GET',
+    url: 'https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/search',
+    params: {query: `${req.body.text}`},
+    headers: {
+      'x-rapidapi-key': FOOD_API_KEY,
+      'x-rapidapi-host': FOOD_HOST
+    }
+  };
+  await axios.request(options).then((results) =>{
+    res.json(
+      // Style the data so it looks nice. 
+      styleFood(query, results.data)
+      );
+      //If there are any errors
+  }).catch(function (error) {
+    console.error(error);
+  });
 });
 
 // Listener for 'doge' slash command that uses the Doge Translator API
