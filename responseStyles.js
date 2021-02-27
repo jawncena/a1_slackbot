@@ -2,6 +2,8 @@
 You can practice here: https://app.slack.com/block-kit-builder/TAQJ10E3A
 */
 
+const e = require("express");
+
 // Style output for joke.
 // blocks is an array of messages to be sent back to Slack.
 exports.styleJoke = (joke) => {
@@ -128,8 +130,25 @@ exports.styleLookup = (query, data) =>{
     };
 }
 
-exports.styleNews = (query, data)=>{
-  if(data.totalResults == 0){
+
+exports.styleNews = (spellcheck, typos, query, data)=>{
+  
+  if(query ==""){
+
+    return noResults={
+      response_type: 'in_channel',
+      blocks: [
+        {
+          'type': 'section',
+          'text': {
+            'type': 'mrkdwn',
+            'text': `You *MUST* input a search element!`,
+          },
+        }
+      ]
+    }
+  }
+  if(data.totalResults == 0 && spellcheck.length >0){
     return noResults={
       response_type: 'in_channel',
       blocks: [
@@ -139,7 +158,21 @@ exports.styleNews = (query, data)=>{
             'type': 'mrkdwn',
             'text': `There are no news articles for the keyword: "${query}"`,
           },
-        }
+        },
+        {
+        'type': 'section',
+        'text': {
+        'type': 'mrkdwn',
+        'text': "It seems like you have some typos in the article you are searching for, the typos are in: " + `*${spellcheck.join(" , ").toString()}*`,
+          },
+        },
+        {
+        'type': 'section',
+        'text': {
+        'type': 'mrkdwn',
+        'text': `Word suggestions for your typos are: `+ `*${typos.join(" , ").toString()}*`,
+          },
+        }, 
       ]
     }
   }
@@ -174,11 +207,29 @@ exports.styleNews = (query, data)=>{
       });
     });
       
+  if(spellcheck.length>0){
+    results.push({
+      'type': 'section',
+      'text': {
+        'type': 'mrkdwn',
+        'text': "It seems like you have some typos in the text you wrote, the typos are in: " + `*${spellcheck.join(" , ").toString()}*`,
+      }
+    });
+    results.push({
+      'type': 'section',
+      'text': {
+        'type': 'mrkdwn',
+        'text': `Word Suggestions: `+ `*${typos.join(" , ").toString()}*`,
+      }
+    });
+    
+  }
   return { 
     response_type: 'in_channel',
       blocks: results
     };
 }
+
 
 exports.styleDoge = (query, data) =>{
   // If the user  query had no results, create an appropriate response

@@ -1,16 +1,20 @@
 const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
+var SpellChecker = require('simple-spellchecker');
+
 
 const {WebClient} = require ('@slack/web-api')
 const {createEventAdapter} = require ('@slack/events-api')
 const {styleJoke, styleLookup, styleNews, styleInspire, styleDoge, styleFood} = require('./responseStyles');
 
+//nlp dictionary
+var dictionary = SpellChecker.getDictionarySync("en-US");    
 // Grab ENV Variables
-require('dotenv').config()
+require('dotenv').config();
 //Grab Tokens from ENV
-const slackEvents = createEventAdapter(process.env.SIGNING_SECRET)
-const SlackClient = new WebClient(process.env.SLACK_TOKEN)
+const slackEvents = createEventAdapter(process.env.SIGNING_SECRET);
+const SlackClient = new WebClient(process.env.SLACK_TOKEN);
 const Port = process.env.PORT || 5000;
 const UTELLY_API_KEY = process.env.UTELLY_API_KEY;
 const UTELLY_HOST = process.env.UTELLY_HOST;
@@ -20,10 +24,10 @@ const FOOD_HOST = process.env.FOOD_HOST;
 
 const NEWS_API_KEY = process.env.NEWS_API_KEY;
 
-const app = express()
-app.use('/slack/events', slackEvents.expressMiddleware())
-app.use(bodyParser.urlencoded({extended: true}))
-app.use(bodyParser.json())
+const app = express();
+app.use('/slack/events', slackEvents.expressMiddleware());
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
 
 app.listen(Port, function(){
   console.log("App listening");
@@ -119,8 +123,27 @@ app.post('/lookup', async function(req, res) {
   });
 });
 
+// Listener for 'news' slash command that uses the News API
 app.post('/news', async function(req,res){
-let query = (req.body.text)
+let query = req.body.text
+//NLP STUFF
+//Get your query into an array of words
+let wordArray=query.trim().split(" ");
+//2 Arrays, one for the wrong spelling and one for suggestions
+let typos = []
+let spellcheck =[]
+//Map and add to arrays
+wordArray.forEach(element => {
+  if(!dictionary.spellCheck(element)){
+    spellcheck.push(element);
+    var wordSuggest = dictionary.getSuggestions(element,2,10);
+    wordSuggest.forEach(sug=>{
+      typos.push(sug);
+    })
+   
+  }
+});
+// End of NLP Stuff
 let options ={
   method: 'GET',
   url:'https://newsapi.org/v2/everything',
@@ -129,12 +152,16 @@ let options ={
     'X-Api-Key':NEWS_API_KEY ,
   }
 };
+
 await axios.request(options).then((results)=>{
   res.json(
-    styleNews(query,results.data)
+    styleNews(spellcheck,typos,query,results.data)
   );
 }).catch(function(error){
-  console.error(error);
+  res.json(
+    styleNews(spellcheck,typos,query,"")
+  );
+  //console.error(error);
 })
 });
 
@@ -152,10 +179,10 @@ slackEvents.on('app_mention', (event)=>{
   console.log(`Got message from user ${event.user}: ${event.text}`);
 (async () => {
   try {
-      //Post Message
     if(event.text.includes("?")){
       await SlackClient.chat.postMessage({ channel: event.channel, text: `${event.text}`});
     };
+
   } catch (error) {
     console.log(error.data)
   }
