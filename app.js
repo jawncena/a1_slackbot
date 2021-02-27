@@ -153,8 +153,9 @@ slackEvents.on('app_mention', (event)=>{
 (async () => {
   try {
       //Post Message
-    await SlackClient.chat.postMessage({ channel: event.channel, text: `Hello, this is wayne` })
-    await SlackClient.chat.postMessage({ channel: event.channel, text: `This is the bot testing branch changes` })
+    if(event.text.includes("?")){
+      await SlackClient.chat.postMessage({ channel: event.channel, text: `${event.text}`});
+    };
   } catch (error) {
     console.log(error.data)
   }
