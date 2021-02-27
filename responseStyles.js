@@ -29,7 +29,44 @@ exports.styleJoke = (joke) => {
 };
 
 
-
+exports.styleFood= (query,data)=>{
+  if(data.totalResults == 0){
+  return noResults = {
+    response_type: 'in_channel',
+    blocks: [
+      {
+        'type': 'section',
+        'text': {
+          'type': 'mrkdwn',
+          'text': `"${query}" isn't food.`,
+        },
+      },
+    ]
+  }
+}
+  let results = []
+  data.results.map(result => {
+    results.push({
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": `<${result.sourceUrl}|*${result.title}*>\n*Ready In:* ${result.readyInMinutes} Minutes\n*Serving Size:* ${result.servings} Servings\n`
+			},
+			"accessory": {
+				"type": "image",
+				"image_url": `https://spoonacular.com/recipeImages/${result.image}`,
+				"alt_text": "alt text for image"
+			}
+		});
+    results.push( {
+      "type": "divider"
+    });
+  });
+  return { 
+    response_type: 'in_channel',
+      blocks: results
+    };
+}
 
 /* Styling for 'lookup' response
 param(query) : what the user inputted, ex: /lookup Avengers -> the query is Avengers
@@ -97,6 +134,7 @@ exports.styleLookup = (query, data) =>{
 exports.styleNews = (spellcheck, typos, query, data)=>{
   
   if(query ==""){
+
     return noResults={
       response_type: 'in_channel',
       blocks: [
